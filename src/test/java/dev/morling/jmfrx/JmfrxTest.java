@@ -46,29 +46,39 @@ public class JmfrxTest {
     public void shouldEmitRuntimeDumpEvent() throws Exception {
         String osEventName = "dev.morling.jmfrx.OperatingSystemDumpEvent";
         String runtimeEventName = "dev.morling.jmfrx.RuntimeDumpEvent";
+        String youngGenerationEventName = "dev.morling.jmfrx.G1_Young_GenerationDumpEvent";
 
         RecordingStream recordingStream = new RecordingStream();
         recordingStream.enable(JmxDumpEvent.NAME)
             .withPeriod(Duration.ofMillis(500))
-            .with("filter", ".*OperatingSystem.*|.*Runtime.*");
+            .with("filter", ".*OperatingSystem.*|.*Runtime.*|.*Young Generation.*");
+
         recordingStream.enable(osEventName);
         recordingStream.enable(runtimeEventName);
+        recordingStream.enable(youngGenerationEventName);
 
-        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch latch = new CountDownLatch(2);
         AtomicReference<RecordedEvent> runtimeEvent = new AtomicReference<>();
+        AtomicReference<RecordedEvent> youngGenerationEvent = new AtomicReference<>();
 
         recordingStream.onEvent(JmxDumpEvent.NAME, event -> {
 //            System.out.println(event);
         });
 
         recordingStream.onEvent(osEventName, event -> {
-            System.out.println(event);
+//            System.out.println(event);
+        });
+
+        recordingStream.onEvent(youngGenerationEventName, event -> {
+//            System.out.println(event);
+            youngGenerationEvent.set(event);
+            latch.countDown();
         });
 
         recordingStream.onEvent(runtimeEventName, event -> {
             runtimeEvent.set(event);
             latch.countDown();
-            System.out.println(event);
+//            System.out.println(event);
         });
 
         recordingStream.startAsync();
@@ -76,6 +86,9 @@ public class JmfrxTest {
 
         assertThat(runtimeEvent.get()).isNotNull();
         assertThat(runtimeEvent.get().getLong("Pid")).isEqualTo(ProcessHandle.current().pid());
+
+        assertThat(youngGenerationEvent.get()).isNotNull();
+        assertThat(youngGenerationEvent.get().getString("ObjectName")).isEqualTo("java.lang:type=GarbageCollector,name=G1 Young Generation");
 
         recordingStream.close();
     }

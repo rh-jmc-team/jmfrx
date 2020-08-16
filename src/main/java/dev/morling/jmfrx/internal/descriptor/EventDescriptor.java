@@ -99,10 +99,10 @@ public class EventDescriptor {
             MBeanInfo mBeanInfo = mbeanServer.getMBeanInfo(objectName);
 
             List<AnnotationElement> eventAnnotations = Arrays.asList(
-                    new AnnotationElement(Category.class, getCategory(mBeanName)),
+                    new AnnotationElement(Category.class, getCategory(objectName)),
                     new AnnotationElement(StackTrace.class, false),
-                    new AnnotationElement(Name.class, getName(mBeanName)),
-                    new AnnotationElement(Label.class, getLabel(mBeanName)),
+                    new AnnotationElement(Name.class, getName(objectName)),
+                    new AnnotationElement(Label.class, getLabel(objectName)),
                     new AnnotationElement(Description.class,  mBeanInfo.getDescription())
             );
 
@@ -119,18 +119,35 @@ public class EventDescriptor {
         }
     }
 
-    private static String[] getCategory(String mBeanName) {
-        String[] parts = mBeanName.split(":");
-        return new String [] { "JMX", parts[0] };
+    private static String[] getCategory(ObjectName objectName) {
+        String domain = objectName.getDomain();
+        String type = objectName.getKeyProperty("type");
+        String name = objectName.getKeyProperty("name");
+
+        if (name != null) {
+            return new String [] { "JMX", domain, type };
+        }
+        else {
+            return new String [] { "JMX", domain };
+        }
     }
 
-    private static String getName(String mBeanName) {
-        return EVENT_TYPE_NAME_PREFIX + getLabel(mBeanName) + EVENT_TYPE_NAME_SUFFIX;
+    private static String getName(ObjectName objectName) {
+        String label = getLabel(objectName);
+        label = label.replaceAll("\\s", "_");
+        return EVENT_TYPE_NAME_PREFIX + label + EVENT_TYPE_NAME_SUFFIX;
     }
 
-    private static String getLabel(String mBeanName) {
-        String[] parts = mBeanName.split("=");
-        return parts[1];
+    private static String getLabel(ObjectName objectName) {
+        String type = objectName.getKeyProperty("type");
+        String name = objectName.getKeyProperty("name");
+
+        if (name != null) {
+            return name;
+        }
+        else {
+            return type;
+        }
     }
 
     private static List<AttributeDescriptor> getFields(ObjectName objectName, MBeanInfo mBeanInfo) {
