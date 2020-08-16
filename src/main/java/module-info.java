@@ -1,3 +1,6 @@
+import dev.morling.jmfrx.internal.profile.JavaLangEventProfileContributor;
+import dev.morling.jmfrx.spi.EventProfileContributor;
+
 /**
  *  Copyright 2020 The JMFRX authors
  *
@@ -17,4 +20,6 @@ module dev.morling.jmfrx {
     exports dev.morling.jmfrx;
     requires java.management;
     requires jdk.jfr;
+    uses EventProfileContributor;
+    provides EventProfileContributor with JavaLangEventProfileContributor;
 }

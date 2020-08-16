@@ -19,9 +19,9 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -35,19 +35,18 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import dev.morling.jmfrx.internal.ValueConverter;
 import dev.morling.jmfrx.internal.profile.AttributeProfile;
 import dev.morling.jmfrx.internal.profile.EventProfile;
+import dev.morling.jmfrx.internal.profile.EventProfileBuilderImpl;
+import dev.morling.jmfrx.spi.EventProfileContributor;
+import dev.morling.jmfrx.spi.ValueConverter;
 import jdk.jfr.AnnotationElement;
 import jdk.jfr.Category;
-import jdk.jfr.DataAmount;
 import jdk.jfr.Description;
 import jdk.jfr.EventFactory;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
-import jdk.jfr.Percentage;
 import jdk.jfr.StackTrace;
-import jdk.jfr.Timespan;
 import jdk.jfr.ValueDescriptor;
 
 /**
@@ -65,31 +64,13 @@ public class EventDescriptor {
     static {
         profiles = new ConcurrentHashMap<>();
 
-        Map<String, AttributeProfile> attributeProfiles = new HashMap<>();
+        EventProfileBuilderImpl builder = new EventProfileBuilderImpl();
+        ServiceLoader<EventProfileContributor> loader = ServiceLoader.load(EventProfileContributor.class);
+        loader.forEach(epc -> {
+            epc.contributeProfiles(builder);
+        });
 
-        attributeProfiles.put("OpenFileDescriptorCount", new AttributeProfile("OpenFileDescriptorCount", int.class, null, v -> v));
-        attributeProfiles.put("TotalSwapSpaceSize", new AttributeProfile("TotalSwapSpaceSize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        attributeProfiles.put("FreeSwapSpaceSize", new AttributeProfile("FreeSwapSpaceSize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        attributeProfiles.put("FreeMemorySize", new AttributeProfile("FreeMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        attributeProfiles.put("TotalMemorySize", new AttributeProfile("TotalMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        attributeProfiles.put("CommittedVirtualMemorySize", new AttributeProfile("CommittedVirtualMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        attributeProfiles.put("FreePhysicalMemorySize", new AttributeProfile("FreePhysicalMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        attributeProfiles.put("TotalPhysicalMemorySize", new AttributeProfile("TotalPhysicalMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        attributeProfiles.put("CpuLoad", new AttributeProfile("CpuLoad", double.class, new AnnotationElement(Percentage.class), v -> v));
-        attributeProfiles.put("ProcessCpuLoad", new AttributeProfile("ProcessCpuLoad", double.class, new AnnotationElement(Percentage.class), v -> v));
-        attributeProfiles.put("SystemCpuLoad", new AttributeProfile("SystemCpuLoad", double.class, new AnnotationElement(Percentage.class), v -> v));
-        attributeProfiles.put("ProcessCpuTime", new AttributeProfile("ProcessCpuTime", long.class, new AnnotationElement(Timespan.class, Timespan.NANOSECONDS), v -> {
-                return v;
-        }));
-
-        EventProfile operatingSystemProfile = new EventProfile("java.lang:type=OperatingSystem", attributeProfiles);
-        profiles.put("java.lang:type=OperatingSystem", operatingSystemProfile);
-
-//        attributeProfiles = new HashMap<>();
-//        attributeProfiles.put("StartTime", new AttributeProfile("StartTime", "StartTime_", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-//        EventProfile runtimeProfile = new EventProfile("java.lang:type=Runtime", attributeProfiles);
-//        profiles.put("java.lang:type=Runtime", runtimeProfile);
-
+        profiles.putAll(builder.getEventProfiles());
     }
 
     private final EventFactory factory;

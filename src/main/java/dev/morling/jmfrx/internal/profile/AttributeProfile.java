@@ -15,7 +15,7 @@
  */
 package dev.morling.jmfrx.internal.profile;
 
-import dev.morling.jmfrx.internal.ValueConverter;
+import dev.morling.jmfrx.spi.ValueConverter;
 import jdk.jfr.AnnotationElement;
 
 public class AttributeProfile {

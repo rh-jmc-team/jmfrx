@@ -15,15 +15,18 @@
  */
 package dev.morling.jmfrx.internal.profile;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EventProfile {
 
     public final String mBeanName;
     public final Map<String, AttributeProfile> attributeProfiles;
 
-    public EventProfile(String mBeanName, Map<String, AttributeProfile> attributeProfiles) {
+    public EventProfile(String mBeanName, List<AttributeProfile> attributeProfiles) {
         this.mBeanName = mBeanName;
-        this.attributeProfiles = attributeProfiles;
+        this.attributeProfiles = attributeProfiles.stream()
+            .collect(Collectors.toUnmodifiableMap(a -> a.name, a -> a));
     }
 }

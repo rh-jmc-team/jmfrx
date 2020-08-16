@@ -15,7 +15,7 @@
  */
 package dev.morling.jmfrx.internal.descriptor;
 
-import dev.morling.jmfrx.internal.ValueConverter;
+import dev.morling.jmfrx.spi.ValueConverter;
 import jdk.jfr.ValueDescriptor;
 
 public class AttributeDescriptor {
