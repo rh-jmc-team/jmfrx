@@ -12,8 +12,21 @@ To learn more about JFR itself, please refer to this [blog post](https://www.mor
 
 This project requires OpenJDK 11 or later at runtime.
 
-In order to use JMFRX, you need to build it from source atm. (see below).
-Then add the following dependency to your project's _pom.xml_:
+JMFRX is not yet available from Maven Central yet;
+in the meantime you can obtain snapshot builds from [JitPack](https://jitpack.io).
+To so, add the following dependency to your project's _pom.xml_:
+
+```xml
+...
+<dependency>
+  <groupId>com.github.gunnarmorling</groupId>
+  <artifactId>jmfrx</artifactId>
+  <version>master-SNAPSHOT</version>
+</dependency>
+...
+```
+
+Alternatively, build JMFRX from source (see below) yourself and add the following dependency to your project's _pom.xml_:
 
 ```xml
 ...
