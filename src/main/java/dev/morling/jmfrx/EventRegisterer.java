@@ -16,11 +16,7 @@
 package dev.morling.jmfrx;
 
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
@@ -28,9 +24,6 @@ import java.util.stream.Collectors;
 
 import javax.management.Attribute;
 import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
@@ -40,26 +33,11 @@ import javax.management.ReflectionException;
 import dev.morling.jmfrx.descriptor.AttributeDescriptor;
 import dev.morling.jmfrx.descriptor.EventDescriptor;
 import dev.morling.jmfrx.event.JmxDumpEvent;
-import dev.morling.jmfrx.profile.AttributeProfile;
-import dev.morling.jmfrx.profile.EventProfile;
-import jdk.jfr.AnnotationElement;
-import jdk.jfr.Category;
-import jdk.jfr.DataAmount;
-import jdk.jfr.Description;
 import jdk.jfr.Event;
-import jdk.jfr.EventFactory;
 import jdk.jfr.FlightRecorder;
-import jdk.jfr.Label;
-import jdk.jfr.Name;
-import jdk.jfr.StackTrace;
-import jdk.jfr.ValueDescriptor;
 
 public class EventRegisterer {
 
-    private static final String EVENT_TYPE_NAME_PREFIX = "dev.morling.jfr.";
-    private static final String EVENT_TYPE_NAME_SUFFIX = "DumpEvent";
-
-    private final ConcurrentMap<String, EventProfile> profiles;
     private final ConcurrentMap<String, EventDescriptor> factories;
     private final ConcurrentMap<Pattern, List<String>> matchingBeanNames;
 
@@ -77,23 +55,6 @@ public class EventRegisterer {
     }
 
     public EventRegisterer() {
-        profiles = new ConcurrentHashMap<>();
-
-        Map<String, AttributeProfile> attributeProfiles = new HashMap<>();
-
-        attributeProfiles.put("OpenFileDescriptorCount", new AttributeProfile("OpenFileDescriptorCount", int.class, null, v -> v));
-        attributeProfiles.put("TotalSwapSpaceSize", new AttributeProfile("TotalSwapSpaceSize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        attributeProfiles.put("FreeSwapSpaceSize", new AttributeProfile("FreeSwapSpaceSize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        attributeProfiles.put("FreeMemorySize", new AttributeProfile("FreeMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        attributeProfiles.put("TotalMemorySize", new AttributeProfile("TotalMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-        EventProfile operatingSystemProfile = new EventProfile("java.lang:type=OperatingSystem", attributeProfiles);
-        profiles.put("java.lang:type=OperatingSystem", operatingSystemProfile);
-
-//        attributeProfiles = new HashMap<>();
-//        attributeProfiles.put("StartTime", new AttributeProfile("StartTime", "StartTime_", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
-//        EventProfile runtimeProfile = new EventProfile("java.lang:type=Runtime", attributeProfiles);
-//        profiles.put("java.lang:type=Runtime", runtimeProfile);
-
         factories = new ConcurrentHashMap<>();
         matchingBeanNames = new ConcurrentHashMap<>();
     }
@@ -121,7 +82,7 @@ public class EventRegisterer {
                 List<String> mBeanNames = matchingBeanNames.computeIfAbsent(dumpEvent.filter.getPattern(), this::getMatchingObjectNames);
 
                 for (String mBeanName : mBeanNames) {
-                    EventDescriptor descriptor = factories.computeIfAbsent(mBeanName, this::getEventDescriptor);
+                    EventDescriptor descriptor = factories.computeIfAbsent(mBeanName, EventDescriptor::getDescriptorFor);
 
                     Event event = descriptor.getFactory().newEvent();
                     event.begin();
@@ -162,106 +123,5 @@ public class EventRegisterer {
             .map(ObjectInstance::getObjectName)
             .map(ObjectName::toString)
             .collect(Collectors.toList());
-    }
-
-    private EventDescriptor getEventDescriptor(String mBeanName) {
-        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
-
-        try {
-            ObjectName objectName = new ObjectName(mBeanName);
-            MBeanInfo mBeanInfo = mbeanServer.getMBeanInfo(objectName);
-
-            List<AnnotationElement> eventAnnotations = Arrays.asList(
-                    new AnnotationElement(Category.class, getCategory(mBeanName)),
-                    new AnnotationElement(StackTrace.class, false),
-                    new AnnotationElement(Name.class, getName(mBeanName)),
-                    new AnnotationElement(Label.class, getLabel(mBeanName)),
-                    new AnnotationElement(Description.class,  mBeanInfo.getDescription())
-            );
-
-            List<AttributeDescriptor> fields = getFields(objectName, mBeanInfo);
-
-            List<ValueDescriptor> valueDescriptors = fields.stream()
-                    .map(AttributeDescriptor::getValueDescriptor)
-                    .collect(Collectors.toList());
-
-            return new EventDescriptor(EventFactory.create(eventAnnotations, valueDescriptors), fields);
-        }
-        catch (IntrospectionException | InstanceNotFoundException | MalformedObjectNameException | ReflectionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String[] getCategory(String mBeanName) {
-        String[] parts = mBeanName.split(":");
-        return new String [] { "JMX", parts[0] };
-    }
-
-    private String getName(String mBeanName) {
-        return EVENT_TYPE_NAME_PREFIX + getLabel(mBeanName) + EVENT_TYPE_NAME_SUFFIX;
-    }
-
-    private String getLabel(String mBeanName) {
-        String[] parts = mBeanName.split("=");
-        return parts[1];
-    }
-
-    private List<AttributeDescriptor> getFields(ObjectName objectName, MBeanInfo mBeanInfo) {
-        List<AttributeDescriptor> fields = new ArrayList<>();
-        MBeanAttributeInfo[] attibuteInfos = mBeanInfo.getAttributes();
-        EventProfile profile = profiles.get(objectName.toString());
-        int i = 0;
-
-        for (MBeanAttributeInfo attr : attibuteInfos) {
-            List<AnnotationElement> fieldAnnotations = new ArrayList<>();
-            fieldAnnotations.add(new AnnotationElement(Label.class, attr.getName()));
-            fieldAnnotations.add(new AnnotationElement(Description.class, attr.getDescription()));
-
-            Class<?> type = null;
-            ValueConverter valueConverter = null;
-            String name = attr.getName();
-
-            if (profile != null) {
-                AttributeProfile attributeProfile = profile.attributeProfiles.get(attr.getName());
-                if (attributeProfile != null) {
-                    if (attributeProfile.annotationElement != null) {
-                        fieldAnnotations.add(attributeProfile.annotationElement);
-                    }
-                    type = attributeProfile.type;
-                    valueConverter = attributeProfile.valueConverter;
-                    name = attributeProfile.name;
-                }
-            }
-            if (type == null) {
-                if (attr.getType().equals(long.class.getName())) {
-                    type = long.class;
-                    valueConverter = v -> v;
-                }
-                else if (attr.getType().equals(boolean.class.getName())) {
-                    type = boolean.class;
-                    valueConverter = v -> v;
-                }
-                else if (attr.getType().equals(int.class.getName())) {
-                    type = int.class;
-                    valueConverter = v -> v;
-                }
-                else if (attr.getType().equals(double.class.getName())) {
-                    type = double.class;
-                    valueConverter = v -> v;
-                }
-                else {
-                    type = String.class;
-                    valueConverter = v -> String.valueOf(v);
-                }
-            }
-
-            fields.add(new AttributeDescriptor(
-                    i++,
-                    new ValueDescriptor(type, name, fieldAnnotations),
-                    valueConverter)
-            );
-        }
-
-        return fields;
     }
 }
