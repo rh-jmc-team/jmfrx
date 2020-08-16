@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package dev.morling.jmfrx.descriptor;
+package dev.morling.jmfrx.internal.descriptor;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -35,9 +35,9 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import dev.morling.jmfrx.ValueConverter;
-import dev.morling.jmfrx.profile.AttributeProfile;
-import dev.morling.jmfrx.profile.EventProfile;
+import dev.morling.jmfrx.internal.ValueConverter;
+import dev.morling.jmfrx.internal.profile.AttributeProfile;
+import dev.morling.jmfrx.internal.profile.EventProfile;
 import jdk.jfr.AnnotationElement;
 import jdk.jfr.Category;
 import jdk.jfr.DataAmount;

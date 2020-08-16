@@ -26,19 +26,19 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import dev.morling.jmfrx.event.JmxDumpEvent;
+import dev.morling.jmfrx.internal.event.JmxDumpEvent;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingStream;
 public class AppTest {
 
     @BeforeClass
     public static void registerEvent() {
-        EventRegisterer.getInstance().registerEvent();
+        Jmfrx.getInstance().register();
     }
 
     @AfterClass
     public static void unregisterEvent() {
-        EventRegisterer.getInstance().unregisterEvent();
+        Jmfrx.getInstance().unregister();
     }
 
     @Test

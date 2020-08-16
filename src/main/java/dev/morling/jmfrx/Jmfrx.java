@@ -30,13 +30,18 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import dev.morling.jmfrx.descriptor.AttributeDescriptor;
-import dev.morling.jmfrx.descriptor.EventDescriptor;
-import dev.morling.jmfrx.event.JmxDumpEvent;
+import dev.morling.jmfrx.internal.descriptor.AttributeDescriptor;
+import dev.morling.jmfrx.internal.descriptor.EventDescriptor;
+import dev.morling.jmfrx.internal.event.JmxDumpEvent;
 import jdk.jfr.Event;
 import jdk.jfr.FlightRecorder;
 
-public class EventRegisterer {
+/**
+ * Entry point into the JMFRX API.
+ *
+ * @author Gunnar Morling
+ */
+public class Jmfrx {
 
     private final ConcurrentMap<String, EventDescriptor> factories;
     private final ConcurrentMap<Pattern, List<String>> matchingBeanNames;
@@ -47,23 +52,26 @@ public class EventRegisterer {
 
         INSTANCE;
 
-        private EventRegisterer registerer = new EventRegisterer();
+        private Jmfrx registerer = new Jmfrx();
 
-        EventRegisterer getRegisterer() {
+        Jmfrx getRegisterer() {
             return registerer;
         }
     }
 
-    public EventRegisterer() {
+    public Jmfrx() {
         factories = new ConcurrentHashMap<>();
         matchingBeanNames = new ConcurrentHashMap<>();
     }
 
-    public static EventRegisterer getInstance() {
+    /**
+     * Gets the single instance of {@code Jmfrx}.
+     */
+    public static Jmfrx getInstance() {
         return Holder.INSTANCE.getRegisterer();
     }
 
-    public void registerEvent() {
+    public void register() {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
 
         hook = () -> {
@@ -107,10 +115,11 @@ public class EventRegisterer {
 
             dumpEvent.commit();
         };
+
         FlightRecorder.addPeriodicEvent(JmxDumpEvent.class, hook);
     }
 
-    public void unregisterEvent() {
+    public void unregister() {
         FlightRecorder.removePeriodicEvent(hook);
     }
 

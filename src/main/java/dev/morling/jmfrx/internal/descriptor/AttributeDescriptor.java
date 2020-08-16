@@ -13,9 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package dev.morling.jmfrx.descriptor;
+package dev.morling.jmfrx.internal.descriptor;
 
-import dev.morling.jmfrx.ValueConverter;
+import dev.morling.jmfrx.internal.ValueConverter;
 import jdk.jfr.ValueDescriptor;
 
 public class AttributeDescriptor {

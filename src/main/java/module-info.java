@@ -13,17 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package dev.morling.jmfrx.profile;
-
-import java.util.Map;
-
-public class EventProfile {
-
-    public final String mBeanName;
-    public final Map<String, AttributeProfile> attributeProfiles;
-
-    public EventProfile(String mBeanName, Map<String, AttributeProfile> attributeProfiles) {
-        this.mBeanName = mBeanName;
-        this.attributeProfiles = attributeProfiles;
-    }
+module dev.morling.jmfrx {
+    exports dev.morling.jmfrx;
+    requires java.management;
+    requires jdk.jfr;
 }

@@ -13,9 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package dev.morling.jmfrx.profile;
+package dev.morling.jmfrx.internal.profile;
 
-import dev.morling.jmfrx.ValueConverter;
+import dev.morling.jmfrx.internal.ValueConverter;
 import jdk.jfr.AnnotationElement;
 
 public class AttributeProfile {
