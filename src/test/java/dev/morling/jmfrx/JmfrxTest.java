@@ -29,7 +29,8 @@ import org.junit.Test;
 import dev.morling.jmfrx.internal.event.JmxDumpEvent;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingStream;
-public class AppTest {
+
+public class JmfrxTest {
 
     @BeforeClass
     public static void registerEvent() {
@@ -43,8 +44,8 @@ public class AppTest {
 
     @Test
     public void shouldEmitRuntimeDumpEvent() throws Exception {
-        String osEventName = "dev.morling.jfr.OperatingSystemDumpEvent";
-        String runtimeEventName = "dev.morling.jfr.RuntimeDumpEvent";
+        String osEventName = "dev.morling.jmfrx.OperatingSystemDumpEvent";
+        String runtimeEventName = "dev.morling.jmfrx.RuntimeDumpEvent";
 
         RecordingStream recordingStream = new RecordingStream();
         recordingStream.enable(JmxDumpEvent.NAME)
@@ -61,14 +62,13 @@ public class AppTest {
         });
 
         recordingStream.onEvent(osEventName, event -> {
-//            System.out.println(event);
+            System.out.println(event);
         });
 
         recordingStream.onEvent(runtimeEventName, event -> {
             runtimeEvent.set(event);
             latch.countDown();
-//            System.out.println(event);
-            System.out.println("onevent: " + System.currentTimeMillis());
+            System.out.println(event);
         });
 
         recordingStream.startAsync();

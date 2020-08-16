@@ -32,7 +32,7 @@ import jdk.jfr.StackTrace;
 @Period("60 s")
 public class JmxDumpEvent extends Event {
 
-    public static final String NAME = "dev.morling.jfr.JmxDumpEvent";
+    public static final String NAME = "dev.morling.jmfrx.JmxDumpEvent";
 
     @Label("Captured MBean Names")
     public String capturedMbeans;

@@ -45,7 +45,9 @@ import jdk.jfr.Description;
 import jdk.jfr.EventFactory;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
+import jdk.jfr.Percentage;
 import jdk.jfr.StackTrace;
+import jdk.jfr.Timespan;
 import jdk.jfr.ValueDescriptor;
 
 /**
@@ -55,7 +57,7 @@ import jdk.jfr.ValueDescriptor;
  */
 public class EventDescriptor {
 
-    private static final String EVENT_TYPE_NAME_PREFIX = "dev.morling.jfr.";
+    private static final String EVENT_TYPE_NAME_PREFIX = "dev.morling.jmfrx.";
     private static final String EVENT_TYPE_NAME_SUFFIX = "DumpEvent";
 
     private static final ConcurrentMap<String, EventProfile> profiles;
@@ -70,6 +72,16 @@ public class EventDescriptor {
         attributeProfiles.put("FreeSwapSpaceSize", new AttributeProfile("FreeSwapSpaceSize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
         attributeProfiles.put("FreeMemorySize", new AttributeProfile("FreeMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
         attributeProfiles.put("TotalMemorySize", new AttributeProfile("TotalMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
+        attributeProfiles.put("CommittedVirtualMemorySize", new AttributeProfile("CommittedVirtualMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
+        attributeProfiles.put("FreePhysicalMemorySize", new AttributeProfile("FreePhysicalMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
+        attributeProfiles.put("TotalPhysicalMemorySize", new AttributeProfile("TotalPhysicalMemorySize", long.class, new AnnotationElement(DataAmount.class, DataAmount.BYTES), v -> v));
+        attributeProfiles.put("CpuLoad", new AttributeProfile("CpuLoad", double.class, new AnnotationElement(Percentage.class), v -> v));
+        attributeProfiles.put("ProcessCpuLoad", new AttributeProfile("ProcessCpuLoad", double.class, new AnnotationElement(Percentage.class), v -> v));
+        attributeProfiles.put("SystemCpuLoad", new AttributeProfile("SystemCpuLoad", double.class, new AnnotationElement(Percentage.class), v -> v));
+        attributeProfiles.put("ProcessCpuTime", new AttributeProfile("ProcessCpuTime", long.class, new AnnotationElement(Timespan.class, Timespan.NANOSECONDS), v -> {
+                return v;
+        }));
+
         EventProfile operatingSystemProfile = new EventProfile("java.lang:type=OperatingSystem", attributeProfiles);
         profiles.put("java.lang:type=OperatingSystem", operatingSystemProfile);
 
