@@ -1,10 +1,12 @@
 # JMFRX - A bridge for capturing JMX data with JDK Flight Recorder
 
-The JMFRX project allows to periodically capture JMX MBeans and emit a corresponding JDK Flight Recorder (JFR) event.
+The JMFRX project allows to periodically capture JMX MBeans and emit a corresponding [JDK Flight Recorder](https://openjdk.java.net/jeps/328) (JFR) event.
 This allows to
 
 * Access JMX data from offline JFR recording files in situations where you cannot directly connect to JMX
 * Emit JMX data via the JFR event streaming API ([JEP 349](https://openjdk.java.net/jeps/349))
+
+To learn more about JFR itself, please refer to this [blog post](https://www.morling.dev/blog/rest-api-monitoring-with-custom-jdk-flight-recorder-events/).
 
 ## Usage
 
