@@ -140,6 +140,7 @@
           <excludes>
             <exclude>jitpack.yml</exclude>
             <exclude>LICENSE.txt</exclude>
+            <exclude>install-jdk.sh</exclude>
           </excludes>
         </configuration>
         <executions>
