@@ -1,6 +1,6 @@
-# JMFRX - A bridge for capturing JMX data with JDK Flight Recorder
+# JmFrX - A bridge for capturing JMX data with JDK Flight Recorder
 
-The JMFRX project allows to periodically capture JMX MBeans and emit a corresponding [JDK Flight Recorder](https://openjdk.java.net/jeps/328) (JFR) event.
+The JmFrX project allows to periodically capture JMX MBeans and emit a corresponding [JDK Flight Recorder](https://openjdk.java.net/jeps/328) (JFR) event.
 This allows to
 
 * Access JMX data from offline JFR recording files in situations where you cannot directly connect to JMX
@@ -12,7 +12,7 @@ To learn more about JFR itself, please refer to this [blog post](https://www.mor
 
 This project requires OpenJDK 11 or later at runtime.
 
-JMFRX is not yet available from Maven Central yet;
+JmFrX is not yet available from Maven Central yet;
 in the meantime you can obtain snapshot builds from [JitPack](https://jitpack.io).
 To so, add the following dependency to your project's _pom.xml_:
 
@@ -26,7 +26,7 @@ To so, add the following dependency to your project's _pom.xml_:
 ...
 ```
 
-Alternatively, build JMFRX from source (see below) yourself and add the following dependency to your project's _pom.xml_:
+Alternatively, build JmFrX from source (see below) yourself and add the following dependency to your project's _pom.xml_:
 
 ```xml
 ...
@@ -38,7 +38,7 @@ Alternatively, build JMFRX from source (see below) yourself and add the followin
 ...
 ```
 
-Then, register the JMFRX event type with Flight Recorder in the start-up routine of your program,
+Then, register the JmFrX event type with Flight Recorder in the start-up routine of your program,
 e.g. its main method, the static initializer of a class loaded early on, an eagerly initialized Spring or CDI bean, etc.
 A Java agent for this purpose will be provided as part of this project soon.
 When using Quarkus, an application start-up event listener can be used like so:
@@ -59,7 +59,7 @@ public class EventRegisterer {
 
 Start your application.
 
-Now create a JFR configuration file, enabling the JMFRX event type.
+Now create a JFR configuration file, enabling the JmFrX event type.
 To do so, open [JDK Mission Control](https://openjdk.java.net/projects/jmc/), and choose your application in the JVM Browser.
 Then follow these steps:
 
@@ -69,7 +69,7 @@ Then follow these steps:
 * Expand the _JMX_ and _JMX Dump_ nodes
 * Make sure the event is _Enabled_, choose a period for dumping the chose JMX MBeans (defaults to 60 s) and select the MBeans to be dumped by means of a regular expression, which matches one or more JMX object names:
 
-![Configuring JMFRX](jmfrx_mission_control_configuration.png)
+![Configuring JmFrX](jmfrx_mission_control_configuration.png)
 
 * Click _OK_ and _OK_
 * Make sure that the template you edited is selected under _Event settings_
@@ -78,7 +78,7 @@ Then follow these steps:
 Once the recording is complete, open the recording file in JDK Mission Control and go to the _Event Browser_.
 You should see periodic events corresponding to the selected MBeans under the _JMX_ node:
 
-![JMFRX Events in JDK Mission Control](jmfrx_events.png)
+![JmFrX Events in JDK Mission Control](jmfrx_events.png)
 
 When not using JDK Mission Control to initiate recordings, but the _jcmd_ utility,
 also create a configuration as described above.
