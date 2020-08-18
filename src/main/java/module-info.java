@@ -19,7 +19,7 @@ import dev.morling.jmfrx.spi.EventProfileContributor;
 module dev.morling.jmfrx {
     exports dev.morling.jmfrx;
     requires java.management;
-    requires jdk.jfr;
+    requires transitive jdk.jfr;
     uses EventProfileContributor;
     provides EventProfileContributor with JavaLangEventProfileContributor;
 }
