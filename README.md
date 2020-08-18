@@ -94,6 +94,12 @@ Run the following to build the project:
 mvn clean install
 ```
 
+## Related Work
+
+JDK Mission Control project lead Marcus Hirt discussed a similar project in a [blog post](http://hirt.se/blog/?p=689) in 2016.
+But unlike the implementation described by Marcus in this post,
+JmFrX is based on the public and supported APIs for defining, configuring and emitting JFR events, as available since OpenJDK 11.
+
 ## License
 
 This code base is available ander the Apache License, version 2.
