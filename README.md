@@ -3,9 +3,11 @@
 The JmFrX project allows to periodically capture JMX MBeans and emit a corresponding [JDK Flight Recorder](https://openjdk.java.net/jeps/328) (JFR) event.
 This allows to
 
+* Track changes to the values of JMX MBean attributes over time without resorting to external monitoring tools
 * Access JMX data from offline JFR recording files in situations where you cannot directly connect to JMX
 * Emit JMX data via the JFR event streaming API ([JEP 349](https://openjdk.java.net/jeps/349))
 
+More details about JmFrX, its motivation and implementation can be found in the official [project announcement](https://www.morling.dev/blog/introducing-jmfrx-a-bridge-from-jmx-to-jdk-flight-recorder/).
 To learn more about JFR itself, please refer to this [blog post](https://www.morling.dev/blog/rest-api-monitoring-with-custom-jdk-flight-recorder-events/).
 
 ## Usage
